@@ -4,10 +4,10 @@
 # CIS 4.1.1 – Ensure cluster-admin is only used where required
 ###############################################
 
-### ====== SETTINGS: ĐIỀN SẴN ====== ###
-PROJECT_ID="cis-gcp-benchmark"
-CLUSTER_NAME="cis-standard-cluster-v2"
-CLUSTER_LOCATION="asia-southeast1-a"
+### ====== SETTINGS ====== ###
+PROJECT_ID="ENTER_YOUR_PROJECT_ID"
+CLUSTER_NAME="ENTER_YOUR_CLUSTER_NAME"
+CLUSTER_LOCATION="ENTER_YOUR_CLUSTER_REGION"
 ### ================================== ###
 
 echo ""
