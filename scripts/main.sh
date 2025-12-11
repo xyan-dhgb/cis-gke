@@ -31,7 +31,7 @@ else
     exit 1
 fi
 
-echo "👉 Đangxác minh ...:"
+echo "👉 Đang xác minh ...:"
 echo ""
 
 $GET_CREDENTIAL_CMD
@@ -42,13 +42,10 @@ else
     exit 1
 fi
 
-
 echo ">>> Converting Windows CRLF -> Linux LF for all scripts..."
 find ./checks -type f -name "*.sh" -exec sed -i 's/\r$//' {} \;
 echo "✔️ Conversion done!"
 echo ""
-
-# ====== Menu có thứ tự ======
 
 SCRIPTS_DIR="./checks"
 
@@ -57,54 +54,24 @@ if [ ! -d "$SCRIPTS_DIR" ]; then
     exit 1
 fi
 
-# Danh sách option theo thứ tự
-ORDERED_OPTIONS=(
-    "4.1.1 Checks"
-    "4.1.3 Checks"
-    "4.1.7 Checks"
-    "4.2.1 Checks"
-    "4.6.1 Checks"
-    "5.4.1 Checks"
-    "Exit"
+# Danh sách scripts cần chạy
+SCRIPTS=(
+    "cis_4.1.1.sh"
+    "cis_4.1.3.sh"
+    "cis_4.1.7.sh"
+    "cis_4.2.1.sh"
+    "cis_4.6.1.sh"
+    "cis_5.4.1.sh"
 )
 
-# Mapping option -> script
-declare -A MENU
-MENU["4.1.1 Checks"]="cis_4.1.1.sh"
-MENU["4.1.3 Checks"]="cis_4.1.3.sh"
-MENU["4.1.7 Checks"]="cis_4.1.7.sh"
-MENU["4.2.1 Checks"]="cis_4.2.1.sh"
-MENU["4.6.1 Checks"]="cis_4.6.1.sh"
-MENU["5.4.1 Checks"]="cis_5.4.1.sh"
-MENU["Exit"]="exit"
+echo "👉 Chạy tất cả checks..."
+echo ""
 
-while true; do
-    echo "=== Chọn script cần chạy ==="
-
-    for i in "${!ORDERED_OPTIONS[@]}"; do
-        index=$((i+1))
-        echo "$index) ${ORDERED_OPTIONS[$i]}"
-    done
-
-    read -p "Nhập số lựa chọn: " CHOICE
-
-    # Convert choice to index
-    OPT_INDEX=$((CHOICE-1))
-    SELECTED="${ORDERED_OPTIONS[$OPT_INDEX]}"
-
-    if [ -z "$SELECTED" ]; then
-        echo "[ERROR] Lựa chọn không hợp lệ, thử lại."
-        continue
-    fi
-
-    if [ "$SELECTED" == "Exit" ]; then
-        echo "Thoát chương trình."
-        break
-    fi
-
-    SCRIPT_FILE="${MENU[$SELECTED]}"
-    echo "👉 Chạy script: $SELECTED – $SCRIPT_FILE"
+for SCRIPT_FILE in "${SCRIPTS[@]}"; do
+    echo "Chạy: $SCRIPT_FILE"
     bash "$SCRIPTS_DIR/$SCRIPT_FILE"
-    echo "=== Script đã chạy xong ==="
+    echo "✔️ $SCRIPT_FILE đã chạy xong"
     echo ""
 done
+
+echo "=== Tất cả checks đã hoàn thành ==="
