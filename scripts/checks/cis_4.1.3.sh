@@ -7,22 +7,9 @@
 
 echo ""
 echo "========== GKE CIS 4.1.3: Minimize wildcard use in Roles and ClusterRoles =========="
-echo "Project ID      : $PROJECT_ID"
-echo "Cluster Name    : $CLUSTER_NAME"
-echo "Cluster Location: $ZONE"
-echo ""
-
 ###############################################
 # Confirm before running
 ###############################################
-
-read -p "This script will SCAN RBAC for CIS violations. Do you want to continue? (yes/no): " CONFIRM
-if [[ "$CONFIRM" != "yes" ]]; then
-    echo "Aborted by user."
-    exit 1
-fi
-
-echo ""
 
 ###############################################
 # Helper functions
@@ -60,6 +47,7 @@ has_wildcard() {
 echo "=== SCANNING all Roles & ClusterRoles for wildcard violations ==="
 
 HAS_VIOLATION=false
+VIOLATION_LIST=()
 
 # Scan Roles
 while read -r item; do
@@ -72,8 +60,8 @@ while read -r item; do
 
   echo "$item" | has_wildcard
   if [[ $? -eq 0 ]]; then
-      echo "[VIOLATION] Role: $ns/$name"
       HAS_VIOLATION=true
+      VIOLATION_LIST+=("Role: $ns/$name")
   fi
 done < <(kubectl get roles --all-namespaces -o json | jq -c '.items[]')
 
@@ -87,27 +75,21 @@ while read -r item; do
 
   echo "$item" | has_wildcard
   if [[ $? -eq 0 ]]; then
-      echo "[VIOLATION] ClusterRole: $name"
       HAS_VIOLATION=true
+      VIOLATION_LIST+=("ClusterRole: $name")
   fi
 done < <(kubectl get clusterroles -o json | jq -c '.items[]')
-
 
 ###############################################
 # 2) FINAL OUTPUT
 ###############################################
 
+echo ""
+
 if [ "$HAS_VIOLATION" = false ]; then
-    echo ""
-    echo "[PASS] No wildcard violations found."
-    echo "CIS 4.1.3 compliant ✔"
+    echo "[PASS] No wildcard violations found. "
     exit 0
 fi
 
-echo ""
-echo "[FAIL] Wildcard violations detected."
-echo "Please manually review related YAML files."
-echo "CIS 4.1.3 NOT compliant ✖"
-echo ""
-
+echo "[FAIL] Wildcard violations detected: ${#VIOLATION_LIST[@]} items - ${VIOLATION_LIST[*]}"
 exit 1

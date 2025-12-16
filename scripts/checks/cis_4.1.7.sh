@@ -8,13 +8,6 @@
 echo ""
 echo "========== CIS 4.1.6: Check Bind, Escalate, Impersonate Permissions =========="
 
-read -p "This script will ONLY scan RBAC for CIS 4.1.6 violations. Continue? (yes/no): " CONFIRM
-if [[ "$CONFIRM" != "yes" ]]; then
-    echo "Aborted by user."
-    exit 1
-fi
-echo ""
-
 # Permission list
 SENSITIVE_PERMS=("bind" "escalate" "impersonate")
 
@@ -32,6 +25,7 @@ is_system_role() {
 }
 
 HAS_VIOLATION=false
+VIOLATION_LIST=()
 
 check_item() {
     local item="$1"
@@ -49,8 +43,8 @@ check_item() {
     for perm in "${SENSITIVE_PERMS[@]}"; do
         echo "$item" | jq -e --arg p "$perm" '.rules[]?.verbs[]? == $p' >/dev/null 2>&1
         if [[ $? -eq 0 ]]; then
-            echo "[VIOLATION] $type: $ns/$name → uses '$perm'"
             HAS_VIOLATION=true
+            VIOLATION_LIST+=("$type: $ns/$name (permission: $perm)")
         fi
     done
 }
@@ -77,12 +71,10 @@ done < <(kubectl get clusterroles -o json | jq -c '.items[]')
 ###############################################
 echo ""
 if [ "$HAS_VIOLATION" = false ]; then
-    echo "[PASS] No sensitive permissions found."
-    echo "CIS 4.1.6 compliant ✔"
+    echo "[PASS] No sensitive permissions found. CIS 4.1.6 compliant ✔"
+    exit 0
 else
-    echo "[FAIL] Sensitive permissions detected."
-    echo "MANUAL REVIEW REQUIRED (CIS requirement)"
+    echo "[FAIL] Sensitive permissions detected: ${#VIOLATION_LIST[@]} items - ${VIOLATION_LIST[*]}"
+    exit 1
 fi
 
-echo ""
-exit 0
