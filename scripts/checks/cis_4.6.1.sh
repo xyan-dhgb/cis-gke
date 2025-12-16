@@ -7,12 +7,6 @@
 
 echo ""
 echo "========== Namespace Boundaries Audit (PASS/WARN) =========="
-read -p "This script will scan all user namespaces. Continue? (yes/no): " CONFIRM
-if [[ "$CONFIRM" != "yes" ]]; then
-    echo "Aborted by user."
-    exit 1
-fi
-echo ""
 
 # Function: check if namespace is system/managed
 is_system_ns() {
@@ -40,6 +34,9 @@ echo ""
 echo "Namespace Boundaries Report"
 echo "---------------------------"
 
+WARN_COUNT=0
+PASS_COUNT=0
+
 # Loop over namespaces
 for ns in "${NS_LIST[@]}"; do
     echo ""
@@ -49,28 +46,34 @@ for ns in "${NS_LIST[@]}"; do
     NP_COUNT=$(kubectl get networkpolicy -n "$ns" --no-headers 2>/dev/null | wc -l)
     if [[ "$NP_COUNT" -gt 0 ]]; then
         echo "  NetworkPolicy: PASS ($NP_COUNT policies found)"
+        PASS_COUNT=$((PASS_COUNT + 1))
     else
         echo "  NetworkPolicy: WARN (no policies found)"
+        WARN_COUNT=$((WARN_COUNT + 1))
     fi
 
     # Check ResourceQuota
     RQ_COUNT=$(kubectl get resourcequota -n "$ns" --no-headers 2>/dev/null | wc -l)
     if [[ "$RQ_COUNT" -gt 0 ]]; then
         echo "  ResourceQuota: PASS ($RQ_COUNT quotas found)"
+        PASS_COUNT=$((PASS_COUNT + 1))
     else
         echo "  ResourceQuota: WARN (no quotas found)"
+        WARN_COUNT=$((WARN_COUNT + 1))
     fi
 
     # Check RBAC cross-namespace: roles granting access to other namespaces
     CROSS_ROLE_COUNT=$(kubectl get roles,clusterroles -n "$ns" -o json 2>/dev/null | jq '[.items[] | .rules[]? | select(.resources? != null) | select(.resources[] | test(".*"))] | length')
     if [[ "$CROSS_ROLE_COUNT" -gt 0 ]]; then
         echo "  RBAC cross-namespace: WARN ($CROSS_ROLE_COUNT potentially over-permissive rules)"
+        WARN_COUNT=$((WARN_COUNT + 1))
     else
         echo "  RBAC cross-namespace: PASS"
+        PASS_COUNT=$((PASS_COUNT + 1))
     fi
 done
 
 echo ""
-echo "========== DONE =========="
-echo ""
+echo "[PASS] Namespace Boundaries audit complete - $WARN_COUNT warnings, $PASS_COUNT passed for ${#NS_LIST[@]} namespaces"
 exit 0
+

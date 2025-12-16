@@ -7,12 +7,6 @@
 
 echo ""
 echo "========== CIS 4.2.1: Pod Security Standard Baseline Enforcement =========="
-read -p "This script will scan namespaces for Pod Security enforcement. Continue? (yes/no): " CONFIRM
-if [[ "$CONFIRM" != "yes" ]]; then
-    echo "Aborted by user."
-    exit 1
-fi
-echo ""
 
 HAS_VIOLATION=false
 VIOLATIONS=()
@@ -42,38 +36,33 @@ while read -r ns_name; do
     fi
 done < <(kubectl get ns -o json | jq -r '.items[].metadata.name')
 
-# Log violations first
-if [[ "$HAS_VIOLATION" = true ]]; then
-    echo "[FAIL]"
-    echo "=== VIOLATIONS FOUND ==="
-    for ns_name in "${VIOLATIONS[@]}"; do
-        enforce_level=$(kubectl get ns "$ns_name" -o json | jq -r '.metadata.annotations["pod-security.kubernetes.io/enforce"] // "none"')
-        echo "[VIOLATION] Namespace '$ns_name' is NOT enforcing Pod Security Baseline or higher. Current enforce level: $enforce_level"
-    done
-    echo ""
-else
+echo ""
+
+if [[ "$HAS_VIOLATION" = false ]]; then
     echo "[PASS] All user namespaces enforce Pod Security Baseline or higher."
-    echo "CIS 4.2.1 compliant ✔"
     exit 0
+else
+    echo "[FAIL] Pod Security violations found: ${#VIOLATIONS[@]} namespaces - ${VIOLATIONS[*]}"
+    exit 1
 fi
 
 # Prompt for manual fix for each violating namespace
-for ns_name in "${VIOLATIONS[@]}"; do
-    read -p "Do you want to enable PSS Baseline for namespace '$ns_name'? (yes/no): " ENABLE
-    if [[ "$ENABLE" == "yes" ]]; then
-        echo "Applying Pod Security Baseline to namespace '$ns_name'..."
-        kubectl label ns "$ns_name" \
-            pod-security.kubernetes.io/enforce=baseline \
-            pod-security.kubernetes.io/audit=baseline \
-            pod-security.kubernetes.io/warn=baseline \
-            --overwrite
-        echo "Done."
-    else
-        echo "Skipping namespace '$ns_name'."
-    fi
-done
+# for ns_name in "${VIOLATIONS[@]}"; do
+#     read -p "Do you want to enable PSS Baseline for namespace '$ns_name'? (yes/no): " ENABLE
+#     if [[ "$ENABLE" == "yes" ]]; then
+#         echo "Applying Pod Security Baseline to namespace '$ns_name'..."
+#         kubectl label ns "$ns_name" \
+#             pod-security.kubernetes.io/enforce=baseline \
+#             pod-security.kubernetes.io/audit=baseline \
+#             pod-security.kubernetes.io/warn=baseline \
+#             --overwrite
+#         echo "Done."
+#     else
+#         echo "Skipping namespace '$ns_name'."
+#     fi
+# done
 
-echo ""
-echo "=== DONE ==="
-echo ""
-exit 0
+# echo ""
+# echo "=== DONE ==="
+# echo ""
+# exit 0
