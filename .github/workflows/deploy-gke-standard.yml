@@ -65,10 +65,7 @@ jobs:
 
       - name: Terraform Init
         id: init
-        run: |
-          terraform init \
-            -backend-config="bucket=${{ secrets.GCS_BACKEND_BUCKET }}" \
-            -backend-config="prefix=terraform/state"
+        run: terraform init
 
       - name: Terraform Validate
         id: validate
@@ -76,11 +73,7 @@ jobs:
 
       - name: Terraform Plan
         id: plan
-        run: |
-          terraform plan \
-            -var="project_id=${{ secrets.GCP_PROJECT_ID }}" \
-            -no-color \
-            -out=tfplan
+        run: terraform plan -no-color -out=tfplan
         continue-on-error: false
 
       - name: Terraform Apply
@@ -88,11 +81,7 @@ jobs:
         if: |
           (github.ref == 'refs/heads/master' && github.event_name == 'push') ||
           (github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'apply')
-        run: |
-          terraform apply \
-            -var="project_id=${{ secrets.GCP_PROJECT_ID }}" \
-            -auto-approve \
-            tfplan
+        run: terraform apply -auto-approve tfplan
 
       - name: Get GKE Cluster Info
         if: steps.apply.outcome == 'success'
