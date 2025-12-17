@@ -158,7 +158,7 @@ cat log.txt
 
 ---
 
-## 📊 Security Checks Included
+## Security Checks Included
 
 The `main.sh` script runs the following CIS Kubernetes Benchmark checks:
 
