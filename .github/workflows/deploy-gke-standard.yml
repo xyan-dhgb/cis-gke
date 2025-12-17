@@ -19,7 +19,7 @@ on:
           - apply
 
 env:
-  TERRAFORM_VERSION: '7.12.0'
+  TERRAFORM_VERSION: '1.6.0'
   WORKING_DIR: 'gcp-gke-infr/standard'
   GCP_REGION: ${{ secrets.GCP_REGION }}
   GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
