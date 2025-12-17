@@ -64,8 +64,8 @@ variable "max_node_count" {
   default     = 10
 
   validation {
-    condition     = var.max_node_count >= var.min_node_count
-    error_message = "Maximum node count must be greater than or equal to minimum node count."
+    condition     = var.max_node_count > 0
+    error_message = "Maximum node count must be greater than 0."
   }
 }
 
