@@ -2,7 +2,7 @@
 
 This repository provides automated deployment of Google Kubernetes Engine (GKE) clusters with CIS Benchmark compliance checks.
 
-## 📋 Repository Overview
+## Repository Overview
 
 The repository contains two main components:
 
@@ -27,7 +27,7 @@ cis-gke/
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Phase 1: Deploy GKE Cluster (Terraform)
 
@@ -173,7 +173,7 @@ The `main.sh` script runs the following CIS Kubernetes Benchmark checks:
 
 ---
 
-## 📋 Log and Report Details
+## Log and Report Details
 
 ### Log File Format (`log.txt`)
 
@@ -198,18 +198,20 @@ The `main.sh` script runs the following CIS Kubernetes Benchmark checks:
 
 ### Report Features (`report.html`)
 
-✅ **Current Logs Tab**
+**Current Logs Tab**
+
 - All recent security check results
 - Color-coded status (Green=PASS, Red=FAIL)
 - Detailed log messages
 
-✅ **Previous Logs Tab** (if available)
+**Previous Logs Tab** (if available)
+
 - Historical results for comparison
 - Track improvements over time
 
 ---
 
-## 🔧 Troubleshooting
+## Troubleshooting
 
 ### Issue: "Missing .env.local"
 **Solution**: Create `.env.local` in `scripts/` directory with required variables
@@ -244,7 +246,7 @@ gcloud compute project-info describe --project=PROJECT_ID
 
 ---
 
-## 📝 Example Workflow
+## Example Workflow
 
 ### Complete Setup (Start to Finish)
 
@@ -271,7 +273,7 @@ cat log.txt
 
 ---
 
-## 🧹 Cleanup
+## Cleanup
 
 ### Destroy Infrastructure
 
@@ -288,7 +290,7 @@ This will delete:
 
 ---
 
-## 📚 Additional Resources
+## Additional Resources
 
 - [Standard Cluster Documentation](gcp-gke-infr/standard/STANDARD.md)
 - [Autopilot Cluster Documentation](gcp-gke-infr/autopilot/AUTOPILOT.md)
@@ -296,17 +298,15 @@ This will delete:
 
 ---
 
-## 🔐 Security Best Practices
+## Security Best Practices
 
-✅ Store sensitive data in `.env.local` (gitignored)
-✅ Review `terraform.tfvars` before applying
-✅ Run security checks after each cluster update
-✅ Monitor `report.html` for compliance drift
-✅ Keep logs for audit trail
+- Store sensitive data in `.env.local` (gitignored)
+- Review `terraform.tfvars` before applying
+- Run security checks after each cluster update
+- Monitor `report.html` for compliance drift
+- Keep logs for audit trail
 
 ---
-
-## 📞 Support
 
 For issues or questions:
 1. Check [Troubleshooting](#-troubleshooting) section
